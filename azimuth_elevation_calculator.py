@@ -7,8 +7,9 @@ import datetime
 antenna_lat = 29.6204  #  degrees
 antenna_lon = -99.5289  # degrees
 antenna_alt = 425  # meters
-
 modem_name = "MRSU001" 
+
+
 def get_iridium_data(modem):
     try:
         session = requests.Session()
@@ -98,7 +99,7 @@ def calculate_distance(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal):
 
     return distance_meters
 
-
+# returns azimuth, elevation in that order for the ground station to correctly 
 def calculate_orientation():
     iridium_data = get_iridium_data(modem_name)
 
