@@ -1,61 +1,59 @@
 import math
 import requests
 import os
-import csv
 import datetime
 
-class ClassIridium:
-    def __init__(self):
-        self.BaseURL = "https://borealis.rci.montana.edu"
-        self.Session = requests.Session()
-        self.Lat = 0
-        self.Lon = 0
-        self.Alt = 0
-        self.Timestamp = None
+#set these to four digits after decimal. 
+antenna_lat = 29.6204  #  degrees
+antenna_lon = -99.5289  # degrees
+antenna_alt = 425  # meters
 
-    def get_iridium_data(self, modem):
-        try:
-            URL = "{}/api/meta/flights?modem_name={}".format(self.BaseURL, modem)
-            req = self.Session.get(URL)
-            req.raise_for_status()
-            latest_flight = req.json()[-1]
+modem_name = "MRSU001" 
+def get_iridium_data(modem):
+    try:
+        session = requests.Session()
 
-            UID = latest_flight["uid"]
+        url = f"https://borealis.rci.montana.edu/api/meta/flights?modem_name={modem}"
+        req = session.get(url)
+        req.raise_for_status()
+        latest_flight = req.json()[-1]
 
-            URL = "{}/api/flight?uid={}".format(self.BaseURL, UID)
-            req = self.Session.get(URL)
-            req.raise_for_status()
-            data = req.json()
+        uid = latest_flight["uid"]
 
-            fields = data["fields"]
-            values = data["data"]
+        url = f"https://borealis.rci.montana.edu/api/flight?uid={uid}"
+        req = session.get(url)
+        req.raise_for_status()
+        data = req.json()
 
-            entry = values[0]
+        fields = data["fields"]
+        values = data["data"]
 
-            self.Timestamp = datetime.datetime.fromtimestamp(entry[fields.index("datetime")]).strftime("%Y%m%d%H%M%S")
-            self.Lat = entry[fields.index("latitude")]
-            self.Lon = entry[fields.index("longitude")]
-            self.Alt = entry[fields.index("altitude")]
+        entry = values[0]
 
-            return self.Timestamp, self.Lat, self.Lon, self.Alt
+        timestamp = datetime.datetime.fromtimestamp(entry[fields.index("datetime")]).strftime("%Y%m%d%H%M%S")
+        lat = entry[fields.index("latitude")]
+        lon = entry[fields.index("longitude")]
+        alt = entry[fields.index("altitude")]
 
-        except requests.exceptions.RequestException as e:
-            print("Error occurred during request:", e)
-            return None
+        return timestamp, lat, lon, alt
 
-    def store_iridium_data(self, data):
-        if data is not None:
-            timestamp, lat, lon, alt = data
-            directory = os.path.join(os.getcwd(), "Data", "LogIridium")
-            os.makedirs(directory, exist_ok=True)
+    except requests.exceptions.RequestException as e:
+        print("Error occurred during request:", e)
+        return None
 
-            date_string = datetime.datetime.now().strftime("%Y%m%d")
-            file_name = f"Iridium_{date_string}.csv"
-            file_path = os.path.join(directory, file_name)
+def store_iridium_data(data):
+    if data is not None:
+        timestamp, lat, lon, alt = data
+        directory = os.path.join(os.getcwd(), "Data", "LogIridium")
+        os.makedirs(directory, exist_ok=True)
 
-            with open(file_path, "a", newline='\n') as f:
-                sentence = f"Timestamp: {timestamp}, Latitude: {lat}, Longitude: {lon}, Altitude: {alt}\n"
-                f.write(sentence)
+        date_string = datetime.datetime.now().strftime("%Y%m%d")
+        file_name = f"Iridium_{date_string}.csv"
+        file_path = os.path.join(directory, file_name)
+
+        with open(file_path, "a", newline='\n') as f:
+            sentence = f"Timestamp: {timestamp}, Latitude: {lat}, Longitude: {lon}, Altitude: {alt}\n"
+            f.write(sentence)
 
 def calculate_azimuth(lat_ant, lon_ant, lat_bal, lon_bal):
     d_lon = lon_bal - lon_ant
@@ -64,7 +62,7 @@ def calculate_azimuth(lat_ant, lon_ant, lat_bal, lon_bal):
     azimuth = math.atan2(y, x)
     return (math.degrees(azimuth) + 360) % 360  # Convert radians to degrees and normalize to [0, 360] range
 
-def calculate_elevation(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal, straight_line_distance):
+def calculate_elevation(alt_ant, alt_bal, straight_line_distance):
     height = abs(alt_bal - alt_ant)
 
     angle = math.atan(height / straight_line_distance)
@@ -100,29 +98,29 @@ def calculate_distance(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal):
 
     return distance_meters
 
-antenna_lat = 29.6204  #  degrees
-antenna_lon = -99.5289  # degrees
-antenna_alt = 425  # meters
 
-InstanceIridium = ClassIridium()
-modem_name = "MRSU001" 
-iridium_data = InstanceIridium.get_iridium_data(modem_name)
+def calculate_orientation():
+    iridium_data = get_iridium_data(modem_name)
 
-if iridium_data is not None:
-    balloon_lat, balloon_lon, balloon_alt = iridium_data[1:]  # Extracting latitude, longitude, and altitude
-    print("Balloon position updated using Iridium data:")
-    print("Latitude:", balloon_lat)
-    print("Longitude:", balloon_lon)
-    print("Altitude:", balloon_alt)
-else:
-    print("Failed to fetch Iridium data. Balloon position remains unchanged.")
+    if iridium_data is not None:
+        balloon_lat, balloon_lon, balloon_alt = iridium_data[1:]  # Extracting latitude, longitude, and altitude
+        print("Balloon position updated using Iridium data:")
+        print("Latitude:", balloon_lat)
+        print("Longitude:", balloon_lon)
+        print("Altitude:", balloon_alt)
+    else:
+        print("Failed to fetch Iridium data. Balloon position remains unchanged.")
 
 
-azimuth = calculate_azimuth(math.radians(antenna_lat), math.radians(antenna_lon),math.radians(balloon_lat), math.radians(balloon_lon))
-straight_line_distance = calculate_distance(antenna_lat, antenna_lon, antenna_alt, balloon_lat, balloon_lon, balloon_alt)
-elevation = calculate_elevation(math.radians(antenna_lat), math.radians(antenna_lon), antenna_alt, math.radians(balloon_lat), math.radians(balloon_lon), balloon_alt, straight_line_distance)
+    azimuth = calculate_azimuth(math.radians(antenna_lat), math.radians(antenna_lon),math.radians(balloon_lat), math.radians(balloon_lon))
+    straight_line_distance = calculate_distance(antenna_lat, antenna_lon, antenna_alt, balloon_lat, balloon_lon, balloon_alt)
+    elevation = calculate_elevation(antenna_alt, balloon_alt, straight_line_distance)
 
+    azimuth = round(azimuth, 2)
+    elevation = round(elevation, 2)
 
-print("Azimuth angle:", azimuth)
-print("Elevation angle:", elevation)
-print("straight line distance between the two in meters: ", straight_line_distance)
+    print("New Azimuth angle for GS:", azimuth)
+    print("New Elevation angle for GS:", elevation)
+    print("Straight line distance between the two in meters: ", straight_line_distance)
+    
+    return azimuth, elevation
