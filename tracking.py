@@ -65,22 +65,100 @@ def calculate_azimuth(lat_ant, lon_ant, lat_bal, lon_bal):
     return (math.degrees(azimuth) + 360) % 360  # Convert radians to degrees and normalize to [0, 360] range
 
 def calculate_elevation(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal):
-    R = 6371000  # Earth's radius in meters
-    d_lat = math.radians(lat_bal - lat_ant)
-    d_lon = math.radians(lon_bal - lon_ant)
-    a = math.sin(d_lat / 2) * math.sin(d_lat / 2) + math.cos(math.radians(lat_ant)) * math.cos(math.radians(lat_bal)) * math.sin(d_lon / 2) * math.sin(d_lon / 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    distance = R * c
+    # Convert latitude and longitude from degrees to radians
+    # lat_ant_rad = math.radians(lat_ant)
+    # lon_ant_rad = math.radians(lon_ant)
+    # lat_bal_rad = math.radians(lat_bal)
+    # lon_bal_rad = math.radians(lon_bal)
 
-    altitude_diff = alt_bal - alt_ant
-    elevation = math.atan2(altitude_diff, distance)
+    # # Calculate differences
+    # delta_lat = lat_bal_rad - lat_ant_rad
+    # delta_lon = lon_bal_rad - lon_ant_rad
 
-    return math.degrees(elevation)
+    # # Calculate distance on the horizontal plane (base of the triangle)
+    # distance = math.sqrt(delta_lat**2 + delta_lon**2)   # Approximation for 1 degree in meters
+
+    straight_line_distance = calculate_distance(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal)
+    
+    # Calculate height difference (height of the triangle)
+    height = abs(alt_bal - alt_ant)
+
+    # Calculate angle (in radians)
+    angle = math.atan(height / straight_line_distance)
+
+    # Convert radians to degrees
+    angle_degrees = math.degrees(angle)
+
+    return angle_degrees
+    # Constants
+    # R = 6371000  # Earth's radius in meters
+    
+    # # Convert degrees to radians
+    # lat_ant_rad = math.radians(lat_ant)
+    # lon_ant_rad = math.radians(lon_ant)
+    # lat_bal_rad = math.radians(lat_bal)
+    # lon_bal_rad = math.radians(lon_bal)
+
+    # # Calculate Cartesian coordinates (x, y, z) for both points
+    # x_ant = (R + alt_ant) * math.cos(lat_ant_rad) * math.cos(lon_ant_rad)
+    # y_ant = (R + alt_ant) * math.cos(lat_ant_rad) * math.sin(lon_ant_rad)
+    # z_ant = (R + alt_ant) * math.sin(lat_ant_rad)
+
+    # x_bal = (R + alt_bal) * math.cos(lat_bal_rad) * math.cos(lon_bal_rad)
+    # y_bal = (R + alt_bal) * math.cos(lat_bal_rad) * math.sin(lon_bal_rad)
+    # z_bal = (R + alt_bal) * math.sin(lat_bal_rad)
+
+    # # Calculate differences in Cartesian coordinates
+    # dx = x_bal - x_ant
+    # dy = y_bal - y_ant
+    # dz = z_bal - z_ant
+
+    # # Calculate distance between points (straight line distance)
+    # distance = math.sqrt(dx**2 + dy**2 + dz**2)
+
+    # # Calculate elevation angle (arcsin of altitude difference over distance)
+    # elevation = math.degrees(math.asin(dz / distance))
+
+    # return elevation
+
+# Define the function to calculate the straight-line distance
+def calculate_distance(lat_ant, lon_ant, alt_ant, lat_bal, lon_bal, alt_bal):
+    # Convert latitude and longitude from degrees to radians
+    lat_ant_rad = math.radians(lat_ant)
+    lon_ant_rad = math.radians(lon_ant)
+    lat_bal_rad = math.radians(lat_bal)
+    lon_bal_rad = math.radians(lon_bal)
+
+    # Earth's radius in meters
+    R_meters = 6371000
+
+    # Convert altitudes to meters
+    alt_ant_meters = alt_ant
+    alt_bal_meters = alt_bal
+
+    # Calculate Cartesian coordinates (x, y, z) for both points
+    x_ant = (R_meters + alt_ant_meters) * math.cos(lat_ant_rad) * math.cos(lon_ant_rad)
+    y_ant = (R_meters + alt_ant_meters) * math.cos(lat_ant_rad) * math.sin(lon_ant_rad)
+    z_ant = (R_meters + alt_ant_meters) * math.sin(lat_ant_rad)
+
+    x_bal = (R_meters + alt_bal_meters) * math.cos(lat_bal_rad) * math.cos(lon_bal_rad)
+    y_bal = (R_meters + alt_bal_meters) * math.cos(lat_bal_rad) * math.sin(lon_bal_rad)
+    z_bal = (R_meters + alt_bal_meters) * math.sin(lat_bal_rad)
+
+    # Calculate differences in Cartesian coordinates
+    dx = x_bal - x_ant
+    dy = y_bal - y_ant
+    dz = z_bal - z_ant
+
+    # Calculate straight-line distance in meters
+    distance_meters = math.sqrt(dx**2 + dy**2 + dz**2)
+
+    return distance_meters
 
 # Antenna position details
 antenna_lat = 29.6204  # Latitude in degrees
 antenna_lon = -99.5289  # Longitude in degrees
-antenna_alt = 430  # Altitude converted from feet to meters
+antenna_alt = 425  # Altitude converted from feet to meters
 
 # Example usage:
 InstanceIridium = ClassIridium()
@@ -101,7 +179,12 @@ azimuth = calculate_azimuth(math.radians(antenna_lat), math.radians(antenna_lon)
                             math.radians(balloon_lat), math.radians(balloon_lon))
 elevation = calculate_elevation(math.radians(antenna_lat), math.radians(antenna_lon), antenna_alt, math.radians(balloon_lat), math.radians(balloon_lon), balloon_alt)
 
+
+
+straight_line_distance_feet = calculate_distance(antenna_lat, antenna_lon, antenna_alt, balloon_lat, balloon_lon, balloon_alt)
+
 print("Azimuth angle:", azimuth)
 print("Elevation angle:", elevation)
+print("straight line distance between the two in meters: ", straight_line_distance_feet)
 
 # lat 29.6204 long -99.5289 alt 430
