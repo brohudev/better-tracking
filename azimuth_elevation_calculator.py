@@ -4,9 +4,9 @@ import os
 import datetime
 
 #set these to four digits after decimal. 
-antenna_lat = 29.6204  #  degrees
-antenna_lon = -99.5289  # degrees
-antenna_alt = 425  # meters
+antenna_lat = 29.6057  #  degrees
+antenna_lon = -99.5597  # degrees
+antenna_alt = 470  # meters
 modem_name = "MRSU001" 
 
 
