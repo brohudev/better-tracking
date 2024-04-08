@@ -1,7 +1,9 @@
 import time
+import time
 import signal
 import sys
 
+from arduino import update_antenna_position  # Importing the function from your module
 from arduino import update_antenna_position  # Importing the function from your module
 
 def signal_handler(sig, frame):
