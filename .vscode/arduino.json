@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "MyBoard",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/brohudev/treasurechest/Extracurriculars/USIP/NEBP/code/Better_tracking/Base code/HERMES/Firmware/Tic/Tic.h"
+            ],
+            "defines": [],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/path/to/gcc",
+            "compilerArgs": []
+        }
+    ],
+    "version": 4,
+    "board": "arduino:avr:uno",
+    "sketch": "Base code/HERMES/Firmware/Firmware.ino"
+}
