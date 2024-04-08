@@ -63,8 +63,13 @@ void loop() {
     String input = Serial.readStringUntil('\n');
     int commaIndex = input.indexOf(',');
     if (commaIndex != -1) {
+      delay(100);
+      Serial.println("got a command: ");
       TargetAnglePan = input.substring(0, commaIndex).toFloat();
       TargetAngleTilt = input.substring(commaIndex + 1).toFloat();
+      Serial.println(TargetAnglePan);
+      Serial.println(",");
+      Serial.println(TargetAngleTilt);
       
       int targetPositionPan = -StepConstant * TargetAnglePan;
       int targetPositionTilt = StepConstant * TargetAngleTilt;
@@ -74,16 +79,16 @@ void loop() {
       tic2.setTargetPosition(targetPositionTilt);
       DelayPos2(targetPositionPan);
 
-      Serial.print("motor at target position: ");
+      Serial.print("\t motor at target position: ");
       Serial.print(targetPositionPan);
       Serial.print(",");
       Serial.println(targetPositionTilt);
       Serial.println("\n");
     } else {
       // If command format is incorrect, send an error message
-      delay(1000)
+      delay(100);
       Serial.println("Error: Invalid command format");
-      Serial.printlin("\n");
+      Serial.println("\n");
     }
   }
 }
