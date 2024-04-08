@@ -2,11 +2,12 @@ import math
 import requests
 import os
 import datetime
+import time
 
 #set these to four digits after decimal. 
-antenna_lat = 29.6057  #  degrees
-antenna_lon = -99.5597  # degrees
-antenna_alt = 470  # meters
+antenna_lat = 29.6204  #  degrees
+antenna_lon = -99.5290  # degrees
+antenna_alt = 417  # meters
 modem_name = "MRSU001" 
 
 
@@ -125,3 +126,10 @@ def calculate_orientation():
     print("Straight line distance between the two in meters: ", straight_line_distance)
     
     return azimuth, elevation
+
+counter = 0
+# Main loop with 1-minute interval
+while True:
+    calculate_orientation()
+    time.sleep(60)  # Delay for 1 minute
+    print("iridium api call#: ", counter)
