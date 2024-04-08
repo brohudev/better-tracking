@@ -6,7 +6,7 @@ def update_antenna_position(COM_port):
     PanAngle, TiltAngle = calculate_orientation()
 
     if PanAngle is not None and TiltAngle is not None:  # Check if angles are calculated successfully
-        Command = f"{PanAngle},{TiltAngle}"
+        Command = f"{PanAngle},{TiltAngle}\n"
 
         try:
             SerialPort = serial.Serial(port=COM_port, baudrate=9600, timeout=0.1)
