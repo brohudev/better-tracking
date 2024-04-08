@@ -4,8 +4,6 @@
 TicI2C tic1(14);
 TicI2C tic2(15);
 
-SoftwareSerial SerialGPS(8, 7);
-
 float TargetAnglePan = 0;
 float TargetAngleTilt = 0;
 const float StepConstant = 127.2889;
@@ -22,11 +20,6 @@ void setup() {
   Wire.begin();
   delay(20);
 
-  // Set the Tic's current position to 0, so that when we command
-  // it to move later, it will move a predictable amount.
-  tic1.haltAndSetPosition(0);
-  tic2.haltAndSetPosition(0);
-
   // Tells the Tic that it is OK to start driving the motor.  The
   // Tic's safe-start feature helps avoid unexpected, accidental
   // movement of the motor: if an error happens, the Tic will not
@@ -36,11 +29,13 @@ void setup() {
   tic1.exitSafeStart();
   tic2.exitSafeStart();
 
+  // Set the Tic's current position to 0, so that when we command
+  // it to move later, it will move a predictable amount.
+  tic1.haltAndSetPosition(0);
+  tic2.haltAndSetPosition(0);
+
   tic1.clearDriverError();
   tic2.clearDriverError();
-
-  tic1.haltAndHold();
-  tic2.haltAndHold();
 }
 
 // Sends a "Reset command timeout" command to the Tic.  We must
@@ -57,14 +52,14 @@ void resetCommandTimeout()
 // Delays for the specified number of milliseconds while
 // resetting the Tic's command timeout so that its movement does
 // not get interrupted by errors.
-void delayWhileResettingCommandTimeout(uint32_t ms)
-{
-  uint32_t start = millis();
-  do
-  {
-    resetCommandTimeout();
-  } while ((uint32_t)(millis() - start) <= ms);
-}
+// void delayWhileResettingCommandTimeout(uint32_t ms)
+// {
+//   uint32_t start = millis();
+//   do
+//   {
+//     resetCommandTimeout();
+//   } while ((uint32_t)(millis() - start) <= ms);
+// }
 
 // Polls the Tic, waiting for it to reach the specified target
 // position.  Note that if the Tic detects an error, the Tic will
@@ -75,16 +70,13 @@ void DelayPos1(int TargetPosition) {
   while (tic1.getCurrentPosition() != TargetPosition) {
     resetCommandTimeout();
   }
-  tic1.haltAndHold();
 }
 
 void DelayPos2(int TargetPosition) {
   while (tic2.getCurrentPosition() != TargetPosition) {
     resetCommandTimeout();
   }
-  tic2.haltAndHold();
 }
-
 
 void loop() {
   // Check if serial data is available
@@ -104,8 +96,11 @@ void loop() {
       // give comand
       tic1.setTargetPosition(targetPositionPan);
       DelayPos1(targetPositionPan);
+      tic1.haltAndHold();
+
       tic2.setTargetPosition(targetPositionTilt);
       DelayPos2(targetPositionPan);
+      tic2.haltAndHold();
     }
   }
 }
