@@ -55,14 +55,17 @@ void resetCommandTimeout()
 void DelayPos1(int TargetPosition) {
   while (tic1.getCurrentPosition() != TargetPosition) {
     resetCommandTimeout();
+    delay(10); // Adding a small delay to reduce CPU usage
   }
 }
 
 void DelayPos2(int TargetPosition) {
   while (tic2.getCurrentPosition() != TargetPosition) {
     resetCommandTimeout();
+    delay(10); // Adding a small delay to reduce CPU usage
   }
 }
+
 
 void loop() {
   if (Serial.available() > 0) {
