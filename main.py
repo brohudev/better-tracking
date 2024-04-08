@@ -1,8 +1,8 @@
-import os
+import time
 import signal
 import sys
 
-from your_module import update_antenna_position  # Importing the function from your module
+from arduino import update_antenna_position  # Importing the function from your module
 
 def signal_handler(sig, frame):
     print("Exiting the program.")
@@ -17,7 +17,7 @@ def main():
     try:
         while True:
             update_antenna_position(COM_port)
-            os.wait(30000)  # Wait for 1 second
+            time.sleep(30)  # Wait for 1 second
     except KeyboardInterrupt:
         print("Exiting the program.")
 
