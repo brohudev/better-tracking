@@ -9,20 +9,27 @@ def send_command(pan_angle, tilt_angle):
     command = f"{pan_angle},{tilt_angle}\n"
     # Send command
     ser.write(command.encode())
-    # Wait for response
-    time.sleep(0.1)
-    response = ser.readline().decode().strip()
-    print(response)
 
 try:
     # Send command to go left 30 degrees
     print("Sending command to go left 30 degrees")
     send_command(-30, 0)
-    # Wait for motor to reach target position
-    time.sleep(2)
+    # Immediately switch to reading from serial
+    while True:
+        response = ser.readline().decode().strip()
+        if response:
+            print(response)
+            break
+
     # Send command to go right 30 degrees
     print("Sending command to go right 30 degrees")
     send_command(30, 0)
+    # Immediately switch to reading from serial
+    while True:
+        response = ser.readline().decode().strip()
+        if response:
+            print(response)
+            break
 
 finally:
     # Close serial port
