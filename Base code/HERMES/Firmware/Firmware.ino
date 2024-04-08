@@ -106,6 +106,11 @@ void loop() {
       DelayPos1(targetPositionPan);
       tic2.setTargetPosition(targetPositionTilt);
       DelayPos2(targetPositionPan);
+      //update serial
+      Serial.write("motor at target position: ")
+      Serial.write(targetPositionPan)
+      Serial.write(",")
+      Serial.write(targetPositionTilt)
     }
   }
 }
