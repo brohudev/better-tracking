@@ -10,8 +10,10 @@ def update_antenna_position(COM_port):
 
         try:
             SerialPort = serial.Serial(port=COM_port, baudrate=9600, timeout=0.1)
+            print("writing command to arduino: ", Command)
             SerialPort.write(Command.encode())
             SerialPort.close()  # Close the serial port after sending the command
+            print("wrote the serial command. exiting.")
         except serial.SerialException as e:
             print(f"Error opening or writing to serial port: {e}")
     else:
